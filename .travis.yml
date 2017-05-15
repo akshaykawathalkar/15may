@@ -1,0 +1,21 @@
+sudo: required
+
+env:
+  COMPOSE_VERSION: 1.10.0
+
+services:
+  - docker
+
+before_install:
+  - curl -L https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+  - chmod +x docker-compose
+  - sudo mv docker-compose /usr/local/bin
+
+script:
+  # check normal docker build
+  - docker build -t dunkelfrosch/jira .
+  - docker run --name df_jira -d -p 127.0.0.1:8080:8080 dunkelfrosch/jira
+  - docker ps | grep "df_jira"
+  - docker logs df_jira
+  - docker ps -aq | xargs docker rm -fv
+  - docker images -q | xargs docker rmi -f
